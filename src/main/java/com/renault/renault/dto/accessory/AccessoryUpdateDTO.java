@@ -3,9 +3,6 @@ package com.renault.renault.dto.accessory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
-/**
- * DTO for Accessory update (request).
- */
 @Schema(description = "Request DTO for updating an existing accessory")
 public record AccessoryUpdateDTO(
     @Schema(description = "Accessory name", example = "GPS Navigation System")

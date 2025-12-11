@@ -6,9 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-/**
- * Standard error response body for API errors.
- */
 @Data
 @Builder
 @NoArgsConstructor

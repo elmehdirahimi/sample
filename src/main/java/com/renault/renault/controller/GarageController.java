@@ -1,5 +1,6 @@
 package com.renault.renault.controller;
 
+import com.renault.renault.dto.common.GarageSearchCriteria;
 import com.renault.renault.dto.garage.GarageDTO;
 import com.renault.renault.service.GarageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +39,43 @@ public class GarageController {
     })
     public ResponseEntity<GarageDTO> createGarage(@Valid @RequestBody GarageDTO garageDTO) {
         return ResponseEntity.ok(garageService.createGarage(garageDTO));
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search garages by flexible criteria",
+            description = "Search for garages by name, vehicle model, fuel type, or accessory availability. " +
+                    "At least one search criterion must be provided. Multiple criteria work together as OR conditions.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Search completed successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = GarageDTO.class))),
+            @ApiResponse(responseCode = "400", description = "No search criteria provided"),
+            @ApiResponse(responseCode = "404", description = "No garages found matching the criteria")
+    })
+    public ResponseEntity<List<GarageDTO>> searchGarages(
+            @Parameter(description = "Garage name (partial match, case-insensitive)") 
+            @RequestParam(required = false) String name,
+            
+            @Parameter(description = "Vehicle model stored in the garage") 
+            @RequestParam(required = false) String model,
+            
+            @Parameter(description = "Vehicle fuel type (e.g., DIESEL, PETROL, ELECTRIC)") 
+            @RequestParam(required = false) String fuelType,
+            
+            @Parameter(description = "Accessory name available in the garage") 
+            @RequestParam(required = false) String accessory) {
+        
+        GarageSearchCriteria criteria = new GarageSearchCriteria(name, model, fuelType, accessory);
+        
+        if (!criteria.hasSearchCriteria()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(List.of());
+        }
+
+        List<GarageDTO> results = garageService.searchGarages(criteria);
+        return results.isEmpty() 
+                ? ResponseEntity.noContent().build() 
+                : ResponseEntity.ok(results);
     }
 
     @PutMapping("/{id}")
@@ -92,29 +131,5 @@ public class GarageController {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(garageService.getAllGarages(pageable, sortBy));
     }
-
-    //TODO: fix search
-    @GetMapping("/search")
-    @Operation(summary = "Search garages by criteria",
-            description = "Search for garages by name, vehicle model, fuel type, or accessory availability")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Search results"),
-            @ApiResponse(responseCode = "400", description = "Missing or invalid search parameters")
-    })
-    public ResponseEntity<List<GarageDTO>> searchGarages(
-            @Parameter(description = "Garage name (contains search)") @RequestParam(required = false) String name,
-            @Parameter(description = "Vehicle model") @RequestParam(required = false) String model,
-            @Parameter(description = "Fuel type") @RequestParam(required = false) String fuelType,
-            @Parameter(description = "Accessory name") @RequestParam(required = false) String accessory) {
-        if (name != null) {
-            return ResponseEntity.ok(garageService.searchGaragesByName(name));
-        } else if (model != null) {
-            return ResponseEntity.ok(garageService.searchGaragesByVehicleModel(model));
-        } else if (fuelType != null) {
-            return ResponseEntity.ok(garageService.searchGaragesByFuelType(fuelType));
-        } else if (accessory != null) {
-            return ResponseEntity.ok(garageService.searchGaragesByAccessory(accessory));
-        }
-        return ResponseEntity.badRequest().build();
-    }
 }
+

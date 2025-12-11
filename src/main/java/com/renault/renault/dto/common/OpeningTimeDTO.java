@@ -6,9 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-/**
- * DTO for OpeningTime entity.
- */
 @Schema(description = "Opening time information for a specific day")
 public record OpeningTimeDTO(
     @Schema(description = "Opening time ID (null for new entries)")

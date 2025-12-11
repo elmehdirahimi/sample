@@ -3,9 +3,6 @@ package com.renault.renault.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * Accessory entity representing an accessory for a vehicle.
- */
 @Entity
 @Table(name = "accessories")
 @Getter

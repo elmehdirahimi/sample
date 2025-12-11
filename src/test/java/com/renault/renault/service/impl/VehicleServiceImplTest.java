@@ -3,6 +3,8 @@ package com.renault.renault.service.impl;
 import com.renault.renault.dto.vehicle.VehicleDTO;
 import com.renault.renault.entity.Garage;
 import com.renault.renault.entity.Vehicle;
+import com.renault.renault.exception.BusinessConstraintViolationException;
+import com.renault.renault.exception.ResourceNotFoundException;
 import com.renault.renault.mapper.VehicleMapper;
 import com.renault.renault.repository.GarageRepository;
 import com.renault.renault.repository.VehicleRepository;
@@ -86,16 +88,13 @@ class VehicleServiceImplTest {
     @Test
     @DisplayName("Add vehicle to garage successfully")
     void testAddVehicle_Success() {
-        // Arrange
         when(garageRepository.findById(1L)).thenReturn(Optional.of(testGarage));
         when(vehicleMapper.toEntity(testVehicleDTO)).thenReturn(testVehicle);
         when(vehicleRepository.save(any(Vehicle.class))).thenReturn(testVehicle);
         when(vehicleMapper.toDto(testVehicle)).thenReturn(testVehicleDTO);
 
-        // Act
         VehicleDTO result = vehicleService.addVehicle(1L, testVehicleDTO);
 
-        // Assert
         assertNotNull(result);
         assertEquals("Clio", result.model());
         assertEquals("Renault", result.brand());
@@ -104,64 +103,52 @@ class VehicleServiceImplTest {
     }
 
     @Test
-    @DisplayName("Add vehicle throws exception when garage not found")
+    @DisplayName("Add vehicle - garage not found")
     void testAddVehicle_GarageNotFound() {
-        // Arrange
         when(garageRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> vehicleService.addVehicle(999L, testVehicleDTO));
+        assertThrows(ResourceNotFoundException.class, () -> vehicleService.addVehicle(999L, testVehicleDTO));
     }
 
     @Test
     @DisplayName("Add vehicle throws exception when garage at capacity")
     void testAddVehicle_GarageAtCapacity() {
-        // Arrange
         testGarage.setVehicleCount(50);
         when(garageRepository.findById(1L)).thenReturn(Optional.of(testGarage));
 
-        // Act & Assert
-        assertThrows(IllegalStateException.class, () -> vehicleService.addVehicle(1L, testVehicleDTO));
+        assertThrows(BusinessConstraintViolationException.class, () -> vehicleService.addVehicle(1L, testVehicleDTO));
     }
 
     @Test
     @DisplayName("Update vehicle successfully")
     void testUpdateVehicle_Success() {
-        // Arrange
         when(vehicleRepository.findById(1L)).thenReturn(Optional.of(testVehicle));
         when(vehicleRepository.save(any(Vehicle.class))).thenReturn(testVehicle);
         when(vehicleMapper.toDto(testVehicle)).thenReturn(testVehicleDTO);
 
-        // Act
         VehicleDTO result = vehicleService.updateVehicle(1L, testVehicleDTO);
 
-        // Assert
         assertNotNull(result);
         verify(vehicleRepository, times(1)).save(any(Vehicle.class));
     }
 
     @Test
-    @DisplayName("Update vehicle throws exception when not found")
+    @DisplayName("Update vehicle - not found")
     void testUpdateVehicle_NotFound() {
-        // Arrange
         when(vehicleRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> vehicleService.updateVehicle(999L, testVehicleDTO));
+        assertThrows(ResourceNotFoundException.class, () -> vehicleService.updateVehicle(999L, testVehicleDTO));
     }
 
     @Test
     @DisplayName("Get vehicles by garage")
     void testGetVehiclesByGarage_Success() {
-        // Arrange
         List<Vehicle> vehicles = Arrays.asList(testVehicle);
         when(vehicleRepository.findByGarage_Id(1L)).thenReturn(vehicles);
         when(vehicleMapper.toDto(testVehicle)).thenReturn(testVehicleDTO);
 
-        // Act
         List<VehicleDTO> result = vehicleService.getVehiclesByGarage(1L);
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         verify(vehicleRepository, times(1)).findByGarage_Id(1L);
@@ -170,15 +157,12 @@ class VehicleServiceImplTest {
     @Test
     @DisplayName("Get vehicles by model")
     void testGetVehiclesByModel_Success() {
-        // Arrange
         List<Vehicle> vehicles = Arrays.asList(testVehicle);
         when(vehicleRepository.findByModel("Clio")).thenReturn(vehicles);
         when(vehicleMapper.toDto(testVehicle)).thenReturn(testVehicleDTO);
 
-        // Act
         List<VehicleDTO> result = vehicleService.getVehiclesByModel("Clio");
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         verify(vehicleRepository, times(1)).findByModel("Clio");

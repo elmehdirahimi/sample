@@ -1,7 +1,9 @@
 package com.renault.renault.service.impl;
 
+import com.renault.renault.dto.common.GarageSearchCriteria;
 import com.renault.renault.dto.garage.GarageDTO;
 import com.renault.renault.entity.Garage;
+import com.renault.renault.exception.ResourceNotFoundException;
 import com.renault.renault.mapper.GarageMapper;
 import com.renault.renault.repository.GarageRepository;
 import com.renault.renault.service.GarageService;
@@ -12,7 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +39,7 @@ public class GarageServiceImpl implements GarageService {
     @Override
     public GarageDTO updateGarage(Long id, GarageDTO garageDTO) {
         Garage garage = garageRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Garage not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Garage not found with ID: " + id));
         garage.setName(garageDTO.name());
         garage.setAddress(garageDTO.address());
         garage.setTelephone(garageDTO.telephone());
@@ -52,7 +57,7 @@ public class GarageServiceImpl implements GarageService {
     @Transactional(readOnly = true)
     public GarageDTO getGarageById(Long id) {
         Garage garage = garageRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Garage not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Garage not found with ID: " + id));
         return garageMapper.toDto(garage);
     }
 
@@ -68,29 +73,27 @@ public class GarageServiceImpl implements GarageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<GarageDTO> searchGaragesByName(String name) {
-        return garageRepository.findByNameContainingIgnoreCase(name)
-                .stream().map(garageMapper::toDto).collect(Collectors.toList());
-    }
+    public List<GarageDTO> searchGarages(GarageSearchCriteria criteria) {
+        Set<Garage> resultSet = new HashSet<>();
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<GarageDTO> searchGaragesByVehicleModel(String model) {
-        return garageRepository.findByVehicles_Model(model)
-                .stream().map(garageMapper::toDto).collect(Collectors.toList());
-    }
+        if (criteria.name() != null) {
+            resultSet.addAll(garageRepository.findByNameContainingIgnoreCase(criteria.name()));
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<GarageDTO> searchGaragesByFuelType(String fuelType) {
-        return garageRepository.findByVehicles_FuelType(fuelType)
-                .stream().map(garageMapper::toDto).collect(Collectors.toList());
-    }
+        if (criteria.model() != null) {
+            resultSet.addAll(garageRepository.findByVehicles_Model(criteria.model()));
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<GarageDTO> searchGaragesByAccessory(String accessoryName) {
-        return garageRepository.findByVehicles_Accessories_Name(accessoryName)
-                .stream().map(garageMapper::toDto).collect(Collectors.toList());
+        if (criteria.fuelType() != null) {
+            resultSet.addAll(garageRepository.findByVehicles_FuelType(criteria.fuelType()));
+        }
+
+        if (criteria.accessory() != null) {
+            resultSet.addAll(garageRepository.findByVehicles_Accessories_Name(criteria.accessory()));
+        }
+
+        return resultSet.stream()
+                .map(garageMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

@@ -6,9 +6,7 @@ import lombok.*;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-/**
- * OpeningTime entity representing the opening hours for a specific day.
- */
+
 @Entity
 @Table(name = "opening_times")
 @Getter

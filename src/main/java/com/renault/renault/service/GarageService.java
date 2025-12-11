@@ -1,5 +1,6 @@
 package com.renault.renault.service;
 
+import com.renault.renault.dto.common.GarageSearchCriteria;
 import com.renault.renault.dto.garage.GarageDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,8 +13,6 @@ public interface GarageService {
     void deleteGarage(Long id);
     GarageDTO getGarageById(Long id);
     Page<GarageDTO> getAllGarages(Pageable pageable, String sortBy);
-    List<GarageDTO> searchGaragesByName(String name);
-    List<GarageDTO> searchGaragesByVehicleModel(String model);
-    List<GarageDTO> searchGaragesByFuelType(String fuelType);
-    List<GarageDTO> searchGaragesByAccessory(String accessoryName);
+
+    List<GarageDTO> searchGarages(GarageSearchCriteria criteria);
 }

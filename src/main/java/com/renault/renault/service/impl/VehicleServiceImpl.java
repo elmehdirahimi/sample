@@ -3,6 +3,8 @@ package com.renault.renault.service.impl;
 import com.renault.renault.dto.vehicle.VehicleDTO;
 import com.renault.renault.entity.Garage;
 import com.renault.renault.entity.Vehicle;
+import com.renault.renault.exception.BusinessConstraintViolationException;
+import com.renault.renault.exception.ResourceNotFoundException;
 import com.renault.renault.mapper.VehicleMapper;
 import com.renault.renault.repository.GarageRepository;
 import com.renault.renault.repository.VehicleRepository;
@@ -27,9 +29,9 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public VehicleDTO addVehicle(Long garageId, VehicleDTO vehicleDTO) {
         Garage garage = garageRepository.findById(garageId)
-                .orElseThrow(() -> new IllegalArgumentException("Garage not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Garage not found with ID: " + garageId));
         if (!garage.canAddVehicle()) {
-            throw new IllegalStateException("Le garage a atteint la limite de 50 véhicules");
+            throw new BusinessConstraintViolationException("Garage has reached the maximum limit of 50 vehicles");
         }
         Vehicle vehicle = vehicleMapper.toEntity(vehicleDTO);
         vehicle.setId(null);
@@ -45,7 +47,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public VehicleDTO updateVehicle(Long id, VehicleDTO vehicleDTO) {
         Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + id));
         vehicle.setBrand(vehicleDTO.brand());
         vehicle.setManufacturingYear(vehicleDTO.manufacturingYear());
         vehicle.setFuelType(vehicleDTO.fuelType());
@@ -57,7 +59,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public void deleteVehicle(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + id));
         Garage garage = vehicle.getGarage();
         vehicleRepository.delete(vehicle);
         if (garage != null) {

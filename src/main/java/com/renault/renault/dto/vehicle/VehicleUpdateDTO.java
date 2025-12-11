@@ -3,9 +3,6 @@ package com.renault.renault.dto.vehicle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
-/**
- * DTO for Vehicle update (request).
- */
 @Schema(description = "Request DTO for updating an existing vehicle")
 public record VehicleUpdateDTO(
     @Schema(description = "Vehicle brand", example = "Renault")

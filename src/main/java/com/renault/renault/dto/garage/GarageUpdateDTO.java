@@ -7,9 +7,6 @@ import jakarta.validation.constraints.*;
 
 import java.util.Set;
 
-/**
- * DTO for Garage update (request).
- */
 @Schema(description = "Request DTO for updating an existing garage")
 public record GarageUpdateDTO(
     @Schema(description = "Garage name", example = "Garage Paris Centre")

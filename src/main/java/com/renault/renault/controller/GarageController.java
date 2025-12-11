@@ -93,6 +93,7 @@ public class GarageController {
         return ResponseEntity.ok(garageService.getAllGarages(pageable, sortBy));
     }
 
+    //TODO: fix search
     @GetMapping("/search")
     @Operation(summary = "Search garages by criteria",
             description = "Search for garages by name, vehicle model, fuel type, or accessory availability")

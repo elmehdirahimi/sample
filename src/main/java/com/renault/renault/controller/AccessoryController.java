@@ -16,10 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST controller for managing accessories of vehicles.
- * Provides endpoints to add, update, delete, and list accessories for a vehicle.
- */
 @RestController
 @RequestMapping("/api/accessories")
 @RequiredArgsConstructor
@@ -27,9 +23,6 @@ import java.util.List;
 public class AccessoryController {
     private final AccessoryService accessoryService;
 
-    /**
-     * Add an accessory to a vehicle.
-     */
     @PostMapping("/vehicle/{vehicleId}")
     @Operation(summary = "Add an accessory to a vehicle",
             description = "Creates and associates a new accessory with the specified vehicle")
@@ -45,9 +38,6 @@ public class AccessoryController {
         return ResponseEntity.ok(accessoryService.addAccessory(vehicleId, accessoryDTO));
     }
 
-    /**
-     * Update an accessory by its ID.
-     */
     @PutMapping("/{id}")
     @Operation(summary = "Update an accessory",
             description = "Updates the details of an existing accessory (name, description, price, type)")
@@ -62,9 +52,6 @@ public class AccessoryController {
         return ResponseEntity.ok(accessoryService.updateAccessory(id, accessoryDTO));
     }
 
-    /**
-     * Delete an accessory by its ID.
-     */
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an accessory",
             description = "Removes an accessory from a vehicle")
@@ -78,9 +65,6 @@ public class AccessoryController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * List all accessories for a given vehicle.
-     */
     @GetMapping("/vehicle/{vehicleId}")
     @Operation(summary = "Get accessories by vehicle",
             description = "Retrieves all accessories associated with a specific vehicle")
